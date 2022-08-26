@@ -120,7 +120,7 @@ Grab the docx_replace.py file from the src folder and be happy!
 ## How to use
 
 ```python
-from python_docx_replace.docx_replace import docx_replace
+from python_docx_replace import docx_replace
 
 # get your document using python-docx
 doc = Document("document.docx")

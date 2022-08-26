@@ -1,17 +1,5 @@
-from docx import Document
-
-__all__ = ["docx_replace"]
-
-
-def _get_all_paragraphs(doc):
-    paragraphs = list(doc.paragraphs)
-    for t in doc.tables:
-        for row in t.rows:
-            for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    paragraphs.append(paragraph)
-    return paragraphs
-
+from typing import Dict
+from common import MaxRetriesReached, get_all_paragraphs
 
 def _simple_replace(p, key, value):
     """Try to replace a key in the paragraph runs, simpler alternative"""
@@ -23,20 +11,18 @@ def _simple_replace(p, key, value):
 def _complex_replace(p, key, value):
     """Complex alternative, which check all broken items inside the runs"""
     max_retries_replace_a_key = 100  # to avoid infinite loop, this value is set
+    current = 0
 
-    changer = RunTextChanger(p, key, value)
-    changer.replace()
-
-    current = 1
     while key in p.text:  # if the key appears more than once in the paragraph, it will replaced all
-        current += 1
-        if current > max_retries_replace_a_key:
+        if current >= max_retries_replace_a_key:
             raise MaxRetriesReached(max_retries_replace_a_key, key)
+
         changer = RunTextChanger(p, key, value)
         changer.replace()
+        current += 1
 
 
-def docx_replace(doc, **kwargs: str):
+def docx_replace(doc, **kwargs: Dict[str, str]):
     """
     Replace all the keys in the word document with the values in the kwargs
 
@@ -53,7 +39,7 @@ def docx_replace(doc, **kwargs: str):
     """
     for key, value in kwargs.items():
         key = f"${{{key}}}"
-        for p in _get_all_paragraphs(doc):
+        for p in get_all_paragraphs(doc):
             if key in p.text:
                 _simple_replace(p, key, value)
                 if key in p.text:
@@ -102,10 +88,3 @@ class RunTextChanger:
         for index, text in self.runs_to_change.items():
             run = self.p.runs[index]
             run.text = "".join(text)
-
-
-class MaxRetriesReached(Exception):
-    def __init__(self, max, key):
-        super().__init__(
-            f"Max of {max} retries was reached when replacing the key '{key}' in the same paragraph. It can indicates that the system was in loop or you have more than {max} keys '{key}' in the same paragraph."
-        )
