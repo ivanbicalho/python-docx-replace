@@ -1,5 +1,5 @@
-from typing import Dict
-from common import MaxRetriesReached, get_all_paragraphs
+from common import MaxRetriesReached
+
 
 def _simple_replace(p, key, value):
     """Try to replace a key in the paragraph runs, simpler alternative"""
@@ -20,30 +20,6 @@ def _complex_replace(p, key, value):
         changer = RunTextChanger(p, key, value)
         changer.replace()
         current += 1
-
-
-def docx_replace(doc, **kwargs: Dict[str, str]):
-    """
-    Replace all the keys in the word document with the values in the kwargs
-
-    ATTENTION: The required format for the keys inside the Word document is: ${key}
-
-    Example usage:
-        Word content = "Hello ${name}, your phone is ${phone}, is that okay?"
-
-        doc = Document("document.docx")  # python-docx dependency
-
-        docx_replace(doc, name="Ivan", phone="+55123456789")
-
-    More information: https://github.com/ivanbicalho/python-docx-replace
-    """
-    for key, value in kwargs.items():
-        key = f"${{{key}}}"
-        for p in get_all_paragraphs(doc):
-            if key in p.text:
-                _simple_replace(p, key, value)
-                if key in p.text:
-                    _complex_replace(p, key, value)
 
 
 class RunTextChanger:
