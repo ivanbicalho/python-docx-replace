@@ -1,4 +1,5 @@
 from typing import Any, List
+
 from python_docx_replace.block_handler import BlockHandler
 from python_docx_replace.key_changer import KeyChanger
 
@@ -62,6 +63,7 @@ class Paragraph:
         """
         Complex alternative, which check all broken items inside the runs
         """
-        while key in self.p.text:  # if the key appears more than once in the paragraph, it will replaced all
+        while key in self.p.text:
+            # if the key appears more than once in the paragraph, it will replaced all
             key_changer = KeyChanger(self.p, key, value)
             key_changer.replace()
