@@ -1,25 +1,62 @@
 from python_docx_replace.exceptions import EndBlockNotFound, InverseInitialEndBlock, MaxRetriesReached
+from python_docx_replace.docx_extensions import delete_paragraph, get_all_paragraphs
+from python_docx_replace.replacer import Replacer
 
 MAX_RETRIES_REPLACE_A_KEY = 100  # to avoid infinite loop, this value is set
 
 
 class Blocks:
-    def replace_blocks(self, p, initial, end, keep_block) -> None:
+    def __init__(self) -> None:
+        self.replacer = Replacer()
+
+    def replace_blocks(self, doc, initial, end, keep_block) -> None:
         current = 0
+        for p in get_all_paragraphs(doc):
+            if initial in p.text:
+                if end in p.text:
+                    changer = RunBlocksRemoval(p, initial, end, keep_block)
+                    changer.replace()
+                else:
+                    if str(p.text).startswith(initial):
+                        p.clear()
+                    else:
+                        # clear only the initial key in the paragraph
+                        self.replacer.complex_replace(p, initial, "")
+                        
 
-        while initial in p.text:  # if the key appears more than once in the paragraph, it will replaced all
-            if end not in p.text:
-                raise EndBlockNotFound(initial, end)
-            if current >= MAX_RETRIES_REPLACE_A_KEY:
-                raise MaxRetriesReached(MAX_RETRIES_REPLACE_A_KEY, initial)
-
-            changer = RunBlocksRemoval(p, initial, end, keep_block)
-            changer.replace()
-            current += 1
+    def replace(self, doc, initial, end, keep_block) -> bool:
+        look_for_initial = True
+        for p in get_all_paragraphs(doc):
+            if look_for_initial:
+                if initial in p.text:
+                    look_for_initial = False
+                    if end in p.text:
+                        changer = RunBlocksRemoval(p, initial, end, keep_block)
+                        changer.replace()
+                        return True
+                    else:
+                        if str(p.text).startswith(initial):
+                            delete_paragraph(p)
+                            continue
+                        else:
+                            # replace key initial by "" + clear everything until the end of the paragraph
+                            continue
+            else:
+                if end in p.text:
+                    if str(p.text).endswith(end):
+                        delete_paragraph(p)
+                        return True
+                    else:
+                        # replace key end by "" + clear everything before the key
+                        return True
+        if look_for_initial:
+            return False
+        else:
+            raise EndBlockNotFound(initial, end)
 
 
 class RunBlocksRemoval:
-    def __init__(self, p, initial, end, keep_block):
+    def __init__(self, p, initial, end, keep_block) -> None:
         self.p = p
         self.initial = initial
         self.end = end
@@ -37,7 +74,7 @@ class RunBlocksRemoval:
             self.run_char_indexes += [char_index for char_index, char in enumerate(run.text)]
             run_index += 1
 
-    def replace(self):
+    def replace(self) -> None:
         self._initialize()
         key_length = len(self.initial)  # initial and end have the same length
 

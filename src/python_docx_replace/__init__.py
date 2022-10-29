@@ -3,6 +3,7 @@ from python_docx_replace.blocks import Blocks
 
 from python_docx_replace.exceptions import MaxRetriesReached
 from python_docx_replace.replacer import Replacer
+from python_docx_replace.docx_extensions import get_all_paragraphs
 
 __all__ = ["docx_replace", "docx_handle_blocks"]
 
@@ -25,7 +26,7 @@ def docx_replace(doc, **kwargs: Dict[str, str]) -> None:
     replacer = Replacer()
     for key, value in kwargs.items():
         key = f"${{{key}}}"
-        for p in _get_all_paragraphs(doc):
+        for p in get_all_paragraphs(doc):
             if key in p.text:
                 replacer.simple_replace(p, key, value)
                 if key in p.text:
@@ -57,16 +58,4 @@ def docx_handle_blocks(doc, **kwargs: Dict[str, bool]) -> None:
     for key, keep_block in kwargs.items():
         initial = f"${{i:{key}}}"
         end = f"${{e:{key}}}"
-        for p in _get_all_paragraphs(doc):
-            if initial in p.text:
-                blocks.replace_blocks(p, initial, end, keep_block)
-
-
-def _get_all_paragraphs(doc) -> List[Any]:
-    paragraphs = list(doc.paragraphs)
-    for t in doc.tables:
-        for row in t.rows:
-            for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    paragraphs.append(paragraph)
-    return paragraphs
+        blocks.replace_blocks(doc, initial, end, keep_block)
