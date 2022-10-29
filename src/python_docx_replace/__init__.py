@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound
 from python_docx_replace.paragraph import Paragraph
@@ -28,7 +28,7 @@ def docx_replace(doc, **kwargs: Dict[str, str]) -> None:
             paragraph.replace_key(key, value)
 
 
-def docx_handle_blocks(doc, **kwargs: Dict[str, bool]) -> None:
+def docx_handle_blocks(doc: Any, **kwargs: bool) -> None:
     """
     Keep or remove blocks in the word document
 
@@ -58,10 +58,10 @@ def docx_handle_blocks(doc, **kwargs: Dict[str, bool]) -> None:
         while result:  # if the keys appear more than once, it will replace all
             result = _handle_blocks(doc, initial, end, keep_block)
 
-        _search_for_lost_end_tag(doc, end)
+        _search_for_lost_end_tag(doc, initial, end)
 
 
-def _handle_blocks(doc, initial, end, keep_block) -> bool:
+def _handle_blocks(doc: Any, initial: str, end: str, keep_block: bool) -> bool:
     look_for_initial = True
     for p in Paragraph.get_all(doc):
         paragraph = Paragraph(p)
@@ -96,7 +96,7 @@ def _handle_blocks(doc, initial, end, keep_block) -> bool:
         raise EndTagNotFound(initial, end)
 
 
-def _search_for_lost_end_tag(doc, initial, end) -> None:
+def _search_for_lost_end_tag(doc: Any, initial: str, end: str) -> None:
     for p in Paragraph.get_all(doc):
         paragraph = Paragraph(p)
         if paragraph.contains(end):

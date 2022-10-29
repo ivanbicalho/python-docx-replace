@@ -1,3 +1,5 @@
+from typing import Dict
+
 from python_docx_replace.exceptions import ReversedInitialEndTags
 
 
@@ -12,9 +14,7 @@ class BlockHandler:
         for run in self.p.runs:
             self.run_text += run.text
             self.runs_indexes += [run_index for _ in run.text]
-            self.run_char_indexes += [
-                char_index for char_index, char in enumerate(run.text)
-            ]
+            self.run_char_indexes += [char_index for char_index, char in enumerate(run.text)]
             run_index += 1
 
     def replace(self, initial: str, end: str, keep_block: bool) -> None:
@@ -24,7 +24,7 @@ class BlockHandler:
         end_index = self.run_text.find(end)
         end_length = len(end)
         end_index_plus_key_length = end_index + end_length
-        runs_to_change = {}
+        runs_to_change: Dict = {}
 
         if end_index < initial_index:
             raise ReversedInitialEndTags(initial, end)
@@ -35,11 +35,9 @@ class BlockHandler:
             run_char_index = self.run_char_indexes[index]
 
             if not runs_to_change.get(run_index):
-                runs_to_change[run_index] = [
-                    char for char_index, char in enumerate(run.text)
-                ]
+                runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
 
-            run_to_change = runs_to_change.get(run_index)
+            run_to_change: Dict = runs_to_change.get(run_index)
             if (
                 (not keep_block)
                 or (index in range(initial_index, initial_index_plus_key_length))
@@ -53,7 +51,7 @@ class BlockHandler:
         key_index = self.run_text.find(key)
         key_length = len(key)
         key_index_plus_key_length = key_index + key_length
-        runs_to_change = {}
+        runs_to_change: Dict = {}
 
         for index in range(key_index, len(self.run_text)):
             run_index = self.runs_indexes[index]
@@ -61,14 +59,10 @@ class BlockHandler:
             run_char_index = self.run_char_indexes[index]
 
             if not runs_to_change.get(run_index):
-                runs_to_change[run_index] = [
-                    char for char_index, char in enumerate(run.text)
-                ]
+                runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
 
-            run_to_change = runs_to_change.get(run_index)
-            if (not keep_block) or (
-                index in range(key_index, key_index_plus_key_length)
-            ):
+            run_to_change: Dict = runs_to_change.get(run_index)
+            if (not keep_block) or (index in range(key_index, key_index_plus_key_length)):
                 run_to_change[run_char_index] = ""
 
         self._real_replace(runs_to_change)
@@ -77,7 +71,7 @@ class BlockHandler:
         key_index = self.run_text.find(key)
         key_length = len(key)
         key_index_plus_key_length = key_index + key_length
-        runs_to_change = {}
+        runs_to_change: Dict = {}
 
         for index in range(0, key_index_plus_key_length):
             run_index = self.runs_indexes[index]
@@ -85,14 +79,10 @@ class BlockHandler:
             run_char_index = self.run_char_indexes[index]
 
             if not runs_to_change.get(run_index):
-                runs_to_change[run_index] = [
-                    char for char_index, char in enumerate(run.text)
-                ]
+                runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
 
-            run_to_change = runs_to_change.get(run_index)
-            if (not keep_block) or (
-                index in range(key_index, key_index_plus_key_length)
-            ):
+            run_to_change: Dict = runs_to_change.get(run_index)
+            if (not keep_block) or (index in range(key_index, key_index_plus_key_length)):
                 run_to_change[run_char_index] = ""
 
         self._real_replace(runs_to_change)
