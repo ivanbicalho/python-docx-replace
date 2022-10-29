@@ -1,8 +1,6 @@
 from typing import Any, List
-from python_docx_replace.exceptions import EndBlockNotFound, InverseInitialEndBlock, MaxRetriesReached
-
-
-MAX_RETRIES_REPLACE_A_KEY = 100  # to avoid infinite loop, this value is set
+from python_docx_replace.block_handler import BlockHandler
+from python_docx_replace.key_changer import KeyChanger
 
 
 class Paragraph:
@@ -41,16 +39,16 @@ class Paragraph:
                 self._complex_replace(key, value)
 
     def replace_block(self, initial, end, keep_block) -> None:
-        current = 0
-        while initial in self.p.text:  # if the key appears more than once in the paragraph, it will replaced all
-            if end not in self.p.text:
-                raise EndBlockNotFound(initial, end)
-            if current >= MAX_RETRIES_REPLACE_A_KEY:
-                raise MaxRetriesReached(MAX_RETRIES_REPLACE_A_KEY, initial)
+        block_handler = BlockHandler(self.p)
+        block_handler.replace(initial, end, keep_block)
 
-            changer = RunBlocksRemoval(self.p, initial, end, keep_block)
-            changer.replace()
-            current += 1
+    def replace_block_and_clear_before_key(self, key, keep_block) -> None:
+        block_handler = BlockHandler(self.p)
+        block_handler.replace_and_clear_before_key(key, keep_block)
+
+    def replace_block_and_clear_after_key(self, key, keep_block) -> None:
+        block_handler = BlockHandler(self.p)
+        block_handler.replace_and_clear_after_key(key, keep_block)
 
     def _simple_replace(self, key, value) -> None:
         """
@@ -64,113 +62,6 @@ class Paragraph:
         """
         Complex alternative, which check all broken items inside the runs
         """
-        current = 0
-
         while key in self.p.text:  # if the key appears more than once in the paragraph, it will replaced all
-            if current >= MAX_RETRIES_REPLACE_A_KEY:
-                raise MaxRetriesReached(MAX_RETRIES_REPLACE_A_KEY, key)
-
-            changer = RunTextChanger(self.p, key, value)
-            changer.replace()
-            current += 1
-
-
-class RunTextChanger:
-    def __init__(self, p, key, value) -> None:
-        self.p = p
-        self.key = key
-        self.value = value
-        self.run_text = ""
-        self.runs_indexes = []
-        self.run_char_indexes = []
-        self.runs_to_change = {}
-
-    def _initialize(self) -> None:
-        run_index = 0
-        for run in self.p.runs:
-            self.run_text += run.text
-            self.runs_indexes += [run_index for _ in run.text]
-            self.run_char_indexes += [char_index for char_index, char in enumerate(run.text)]
-            run_index += 1
-
-    def replace(self) -> None:
-        self._initialize()
-        parsed_key_length = len(self.key)
-        index_to_replace = self.run_text.find(self.key)
-
-        for i in range(parsed_key_length):
-            index = index_to_replace + i
-            run_index = self.runs_indexes[index]
-            run = self.p.runs[run_index]
-            run_char_index = self.run_char_indexes[index]
-
-            if not self.runs_to_change.get(run_index):
-                self.runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
-
-            run_to_change = self.runs_to_change.get(run_index)
-            if index == index_to_replace:
-                run_to_change[run_char_index] = self.value
-            else:
-                run_to_change[run_char_index] = ""
-
-        # make the real replace
-        for index, text in self.runs_to_change.items():
-            run = self.p.runs[index]
-            run.text = "".join(text)
-
-
-class RunBlocksRemoval:
-    def __init__(self, p, initial, end, keep_block) -> None:
-        self.p = p
-        self.initial = initial
-        self.end = end
-        self.keep_block = keep_block
-        self.run_text = ""
-        self.runs_indexes = []
-        self.run_char_indexes = []
-        self.runs_to_change = {}
-
-    def _initialize(self) -> None:
-        run_index = 0
-        for run in self.p.runs:
-            self.run_text += run.text
-            self.runs_indexes += [run_index for _ in run.text]
-            self.run_char_indexes += [char_index for char_index, char in enumerate(run.text)]
-            run_index += 1
-
-    def replace(self) -> None:
-        self._initialize()
-        key_length = len(self.initial)  # initial and end have the same length
-
-        initial_index = self.run_text.find(self.initial)
-        end_index = self.run_text.find(self.end)
-
-        if end_index < initial_index:
-            raise InverseInitialEndBlock(self.initial, self.end)
-
-        initial_index_plus_key_length = initial_index + key_length
-        end_index_plus_key_length = end_index + key_length
-
-        for index in range(initial_index, end_index_plus_key_length):
-            run_index = self.runs_indexes[index]
-            run = self.p.runs[run_index]
-            run_char_index = self.run_char_indexes[index]
-
-            if not self.runs_to_change.get(run_index):
-                self.runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
-
-            run_to_change = self.runs_to_change.get(run_index)
-            if (
-                (not self.keep_block)
-                or (index in range(initial_index, initial_index_plus_key_length))
-                or (index in range(end_index, end_index_plus_key_length))
-            ):
-                run_to_change[run_char_index] = ""
-
-            if index > end_index_plus_key_length:
-                break
-
-        # make the real replace
-        for index, text in self.runs_to_change.items():
-            run = self.p.runs[index]
-            run.text = "".join(text)
+            key_changer = KeyChanger(self.p, key, value)
+            key_changer.replace()
