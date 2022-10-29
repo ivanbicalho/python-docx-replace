@@ -1,7 +1,8 @@
 from typing import Any, Dict, List
 from python_docx_replace.blocks import Blocks
 
-from python_docx_replace.exceptions import MaxRetriesReached
+from python_docx_replace.exceptions import EndBlockNotFound, MaxRetriesReached
+from python_docx_replace.paragraph import Paragraph
 from python_docx_replace.replacer import Replacer
 from python_docx_replace.docx_extensions import get_all_paragraphs
 
@@ -23,14 +24,11 @@ def docx_replace(doc, **kwargs: Dict[str, str]) -> None:
 
     More information: https://github.com/ivanbicalho/python-docx-replace
     """
-    replacer = Replacer()
     for key, value in kwargs.items():
         key = f"${{{key}}}"
-        for p in get_all_paragraphs(doc):
-            if key in p.text:
-                replacer.simple_replace(p, key, value)
-                if key in p.text:
-                    replacer.complex_replace(p, key, value)
+        for p in Paragraph.get_all(doc):
+            paragraph = Paragraph(p)
+            paragraph.replace_key(key, value)
 
 
 def docx_handle_blocks(doc, **kwargs: Dict[str, bool]) -> None:
@@ -54,8 +52,39 @@ def docx_handle_blocks(doc, **kwargs: Dict[str, bool]) -> None:
 
     More information: https://github.com/ivanbicalho/python-docx-replace
     """
-    blocks = Blocks()
     for key, keep_block in kwargs.items():
-        initial = f"${{i:{key}}}"
-        end = f"${{e:{key}}}"
-        blocks.replace_blocks(doc, initial, end, keep_block)
+        #TODO: put it in a loop to replace the same key N times
+        initial = f"<{key}>"
+        end = f"</{key}>"
+        look_for_initial = True
+        for p in Paragraph.get_all(doc):
+            paragraph = Paragraph(p)
+            if look_for_initial:
+                if paragraph.contains(initial):
+                    look_for_initial = False
+                    if paragraph.contains(end):
+                        paragraph.replace_block(initial, end, keep_block)
+                        return True
+                        # changer = RunBlocksRemoval(p, initial, end, keep_block)
+                        # changer.replace()
+                    else:
+                        if paragraph.startswith(initial):
+                            paragraph.delete()
+                            continue
+                        else:
+                            paragraph.replace_block_and_clear_after_key(initial, keep_block)
+                            # replace key initial by "" + clear everything until the end of the paragraph
+                            continue
+            else:
+                if paragraph.contains(end):
+                    if paragraph.endswith(end):
+                        paragraph.delete()
+                        return True
+                    else:
+                        paragraph.replace_block_and_clear_before_key(end, keep_block)
+                        # replace key end by "" + clear everything before the key
+                        return True
+        if look_for_initial:
+            return False
+        else:
+            raise EndBlockNotFound(initial, end)
