@@ -42,13 +42,13 @@ class Paragraph:
         block_handler = BlockHandler(self.p)
         block_handler.replace(initial, end, keep_block)
 
-    def replace_block_and_clear_before_key(self, key, keep_block) -> None:
+    def clear_tag_and_before(self, key, keep_block) -> None:
         block_handler = BlockHandler(self.p)
-        block_handler.replace_and_clear_before_key(key, keep_block)
+        block_handler.clear_key_and_before(key, keep_block)
 
-    def replace_block_and_clear_after_key(self, key, keep_block) -> None:
+    def clear_tag_and_after(self, key, keep_block) -> None:
         block_handler = BlockHandler(self.p)
-        block_handler.replace_and_clear_after_key(key, keep_block)
+        block_handler.clear_key_and_after(key, keep_block)
 
     def _simple_replace(self, key, value) -> None:
         """

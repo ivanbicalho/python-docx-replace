@@ -1,4 +1,4 @@
-from python_docx_replace.exceptions import InverseInitialEndBlock
+from python_docx_replace.exceptions import ReversedInitialEndTags
 
 
 class BlockHandler:
@@ -25,7 +25,7 @@ class BlockHandler:
         runs_to_change = {}
 
         if end_index < initial_index:
-            raise InverseInitialEndBlock(initial, end)
+            raise ReversedInitialEndTags(initial, end)
 
         for index in range(initial_index, end_index_plus_key_length):
             run_index = self.runs_indexes[index]
@@ -43,12 +43,9 @@ class BlockHandler:
             ):
                 run_to_change[run_char_index] = ""
 
-            # if index > end_index_plus_key_length:
-            #     break
-
         self._real_replace(runs_to_change)
 
-    def replace_and_clear_after_key(self, key: str, keep_block: bool) -> None:
+    def clear_key_and_after(self, key: str, keep_block: bool) -> None:
         key_index = self.run_text.find(key)
         key_length = len(key)
         key_index_plus_key_length = key_index + key_length
@@ -66,12 +63,9 @@ class BlockHandler:
             if (not keep_block) or (index in range(key_index, key_index_plus_key_length)):
                 run_to_change[run_char_index] = ""
 
-            # if index > self.end_index_plus_key_length:
-            #     break
-
         self._real_replace(runs_to_change)
 
-    def replace_and_clear_before_key(self, key: str, keep_block: bool) -> None:
+    def clear_key_and_before(self, key: str, keep_block: bool) -> None:
         key_index = self.run_text.find(key)
         key_length = len(key)
         key_index_plus_key_length = key_index + key_length

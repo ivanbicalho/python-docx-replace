@@ -1,6 +1,6 @@
 from typing import Dict
 
-from python_docx_replace.exceptions import EndBlockNotFound
+from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound
 from python_docx_replace.paragraph import Paragraph
 
 __all__ = ["docx_replace", "docx_handle_blocks"]
@@ -58,6 +58,8 @@ def docx_handle_blocks(doc, **kwargs: Dict[str, bool]) -> None:
         while result:  # if the keys appear more than once, it will replace all
             result = _handle_blocks(doc, initial, end, keep_block)
 
+        _search_for_lost_end_tag(doc, end)
+
 
 def _handle_blocks(doc, initial, end, keep_block) -> bool:
     look_for_initial = True
@@ -74,7 +76,7 @@ def _handle_blocks(doc, initial, end, keep_block) -> bool:
                         paragraph.delete()
                         continue
                     else:
-                        paragraph.replace_block_and_clear_after_key(initial, keep_block)
+                        paragraph.clear_tag_and_after(initial, keep_block)
                         continue
         else:
             if paragraph.contains(end):
@@ -82,9 +84,20 @@ def _handle_blocks(doc, initial, end, keep_block) -> bool:
                     paragraph.delete()
                     return True
                 else:
-                    paragraph.replace_block_and_clear_before_key(end, keep_block)
+                    paragraph.clear_tag_and_before(end, keep_block)
                     return True
+            else:
+                if not keep_block:
+                    paragraph.delete()
+                continue
     if look_for_initial:
         return False
     else:
-        raise EndBlockNotFound(initial, end)
+        raise EndTagNotFound(initial, end)
+
+
+def _search_for_lost_end_tag(doc, initial, end) -> None:
+    for p in Paragraph.get_all(doc):
+        paragraph = Paragraph(p)
+        if paragraph.contains(end):
+            raise InitialTagNotFound(initial, end)
