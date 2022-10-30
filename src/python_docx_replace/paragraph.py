@@ -35,9 +35,9 @@ class Paragraph:
     def replace_key(self, key, value) -> None:
         key = f"${{{key}}}"
         if key in self.p.text:
-            self._simple_replace(key, value)
+            self._simple_replace_key(key, value)
             if key in self.p.text:
-                self._complex_replace(key, value)
+                self._complex_replace_key(key, value)
 
     def replace_block(self, initial, end, keep_block) -> None:
         block_handler = BlockHandler(self.p)
@@ -51,18 +51,14 @@ class Paragraph:
         block_handler = BlockHandler(self.p)
         block_handler.clear_key_and_after(key, keep_block)
 
-    def _simple_replace(self, key, value) -> None:
-        """
-        Try to replace a key in the paragraph runs, simpler alternative
-        """
+    def _simple_replace_key(self, key, value) -> None:
+        # try to replace a key in the paragraph runs, simpler alternative
         for run in self.p.runs:
             if key in run.text:
                 run.text = run.text.replace(key, value)
 
-    def _complex_replace(self, key, value) -> None:
-        """
-        Complex alternative, which check all broken items inside the runs
-        """
+    def _complex_replace_key(self, key, value) -> None:
+        # complex alternative, which check all broken items inside the runs
         while key in self.p.text:
             # if the key appears more than once in the paragraph, it will replaced all
             key_changer = KeyChanger(self.p, key, value)

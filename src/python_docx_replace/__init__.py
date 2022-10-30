@@ -3,7 +3,7 @@ from typing import Any
 from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound
 from python_docx_replace.paragraph import Paragraph
 
-__all__ = ["docx_replace", "docx_handle_blocks"]
+__all__ = ["docx_replace", "docx_blocks"]
 
 
 def docx_replace(doc, **kwargs: str) -> None:
@@ -28,7 +28,7 @@ def docx_replace(doc, **kwargs: str) -> None:
             paragraph.replace_key(key, value)
 
 
-def docx_handle_blocks(doc: Any, **kwargs: bool) -> None:
+def docx_blocks(doc: Any, **kwargs: bool) -> None:
     """
     Keep or remove blocks in the word document
 
@@ -58,6 +58,8 @@ def docx_handle_blocks(doc: Any, **kwargs: bool) -> None:
         while result:  # if the keys appear more than once, it will replace all
             result = _handle_blocks(doc, initial, end, keep_block)
 
+        # end tags can exists alone in the document
+        # this function just make sure that if it's the case, raise an error
         _search_for_lost_end_tag(doc, initial, end)
 
 
@@ -67,32 +69,47 @@ def _handle_blocks(doc: Any, initial: str, end: str, keep_block: bool) -> bool:
         paragraph = Paragraph(p)
         if look_for_initial:
             if paragraph.contains(initial):
-                look_for_initial = False
+                look_for_initial = False  # initial tag found, next search will be for end tag
                 if paragraph.contains(end):
+                    # if the initial and end tag are in the same paragraph, treat them together
                     paragraph.replace_block(initial, end, keep_block)
-                    return True
+                    return True  # block completed, returns
                 else:
+                    # the current paragraph doesn't have the end tag
                     if paragraph.startswith(initial):
+                        # if the paragraph starts with the initial tag, we can delete the entire paragraph,
+                        # because the end tag is not here
                         paragraph.delete()
                         continue
                     else:
+                        # if the paragraph doesn't start with the initial tag, we cannot delete the entire
+                        # paragraph, we have to clear the tag and remove the content right after (if not keep_block)
                         paragraph.clear_tag_and_after(initial, keep_block)
                         continue
         else:
+            # we are looking for the end tag as the initial tag was found and treated before
             if paragraph.contains(end):
+                # end tag found in this paragraph
                 if paragraph.endswith(end):
+                    # if the paragraph ends with the end tag, we can delete the entire paragraph
                     paragraph.delete()
-                    return True
+                    return True  # block completed, returns
                 else:
+                    # if the paragraph doesn't end with the end tag, we cannot delete the entire
+                    # paragraph, we have to clear the tag and remove the content right before (if not keep_block)
                     paragraph.clear_tag_and_before(end, keep_block)
-                    return True
+                    return True  # block completed, returns
             else:
+                # paragraph doesn't have the end key, that means there is no tags here. In this case,
+                # we can remove the entire paragraph if not keep_block, otherwise do nothing
                 if not keep_block:
                     paragraph.delete()
                 continue
     if look_for_initial:
-        return False
+        # if the initial tag wasn't found, the block doesn't exist
+        return False  # block completed, returns
     else:
+        # if the initial tag was found, but not end tag, raise an error
         raise EndTagNotFound(initial, end)
 
 
