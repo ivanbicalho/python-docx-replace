@@ -111,14 +111,6 @@ Run Char Index:  0   1   2   3   4   5   6      7  8  9 0  1  2   3   4   5   6 
 
 All done, now you Word document is fully replaced keeping all the format.
 
-## How to install
-
-### Via PyPI
-
-```bash
-pip3 install python-docx-replace
-```
-
 ## Replace blocks - docx_blocks
 
 You can define a block in your Word document and set if it is going to be showed or not. The format required for key blocks are exactly like tags `HTML`, as following:
@@ -167,6 +159,14 @@ Contract
 
 Detais of the contract
 
+```
+
+## How to install
+
+### Via PyPI
+
+```bash
+pip3 install python-docx-replace
 ```
 
 ## How to use
