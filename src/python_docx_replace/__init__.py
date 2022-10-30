@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound
 from python_docx_replace.paragraph import Paragraph
@@ -6,7 +6,7 @@ from python_docx_replace.paragraph import Paragraph
 __all__ = ["docx_replace", "docx_handle_blocks"]
 
 
-def docx_replace(doc, **kwargs: Dict[str, str]) -> None:
+def docx_replace(doc, **kwargs: str) -> None:
     """
     Replace all the keys in the word document with the values in the kwargs
 
