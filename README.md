@@ -207,6 +207,9 @@ docx_replace(doc, name="Ivan", phone="+55123456789")
 # call the blocks function with your sets
 docx_blocks(doc, signature=True, table_of_contents=False)
 
+# remove the first table in the Word document
+docx_remove_table(doc, 0)
+
 # do whatever you want after that, usually save the document
 doc.save("replaced.docx")
 ```
