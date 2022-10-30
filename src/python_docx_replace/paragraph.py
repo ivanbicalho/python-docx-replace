@@ -33,7 +33,6 @@ class Paragraph:
         return str(self.p.text).strip().endswith(key)
 
     def replace_key(self, key, value) -> None:
-        key = f"${{{key}}}"
         if key in self.p.text:
             self._simple_replace_key(key, value)
             if key in self.p.text:
