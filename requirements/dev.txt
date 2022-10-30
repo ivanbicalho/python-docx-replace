@@ -1,0 +1,7 @@
+mypy
+flake8
+black
+isort
+build
+twine
+python-docx
