@@ -25,7 +25,7 @@ def docx_replace(doc, **kwargs: str) -> None:
         key = f"${{{key}}}"
         for p in Paragraph.get_all(doc):
             paragraph = Paragraph(p)
-            paragraph.replace_key(key, value)
+            paragraph.replace_key(key, str(value))
 
 
 def docx_blocks(doc: Any, **kwargs: bool) -> None:

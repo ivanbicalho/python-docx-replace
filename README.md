@@ -186,3 +186,14 @@ docx_blocks(doc, signature=True, table_of_contents=False)
 # do whatever you want after that, usually save the document
 doc.save("replaced.docx")
 ```
+
+> TIP: If you want to call with a defined `dict` variable, you can leverage the `**` syntax from python:
+
+```python
+my_dict = {
+    "name": "Ivan",
+    "phone": "+55123456789"
+}
+
+docx_replace(doc, **my_dict)
+```
