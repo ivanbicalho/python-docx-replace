@@ -1,9 +1,9 @@
 from typing import Any
 
-from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound
+from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound, TableIndexNotFound
 from python_docx_replace.paragraph import Paragraph
 
-__all__ = ["docx_replace", "docx_blocks"]
+__all__ = ["docx_replace", "docx_blocks", "docx_remove_table"]
 
 
 def docx_replace(doc, **kwargs: str) -> None:
@@ -63,13 +63,40 @@ def docx_blocks(doc: Any, **kwargs: bool) -> None:
         _search_for_lost_end_tag(doc, initial, end)
 
 
+def docx_remove_table(doc: Any, index: int) -> None:
+    """
+    Remove a table from your Word document by index
+
+    Example usage:
+        docx_remove_table(doc, 0)  # it will remove the first table
+
+    If the table index wasn't found, an error will be raised
+
+    ATTENTION:
+        The table index works exactly like any indexing property. It means if you
+        remove an index, it will affect the other indexes. For example, if you want
+        to remove the first two tables, you can't do like this:
+            - docx_remove_table(doc, 0)
+            - docx_remove_table(doc, 1)
+        You should instead do like this:
+            - docx_remove_table(doc, 0)
+            - docx_remove_table(doc, 0)
+    """
+    try:
+        table = doc.tables[index]
+        table._element.getparent().remove(table._element)
+    except IndexError:
+        raise TableIndexNotFound(index, len(doc.tables))
+
+
 def _handle_blocks(doc: Any, initial: str, end: str, keep_block: bool) -> bool:
+    # The below process is a little bit complex, so I decided to comment each step
     look_for_initial = True
     for p in Paragraph.get_all(doc):
         paragraph = Paragraph(p)
         if look_for_initial:
             if paragraph.contains(initial):
-                look_for_initial = False  # initial tag found, next search will be for end tag
+                look_for_initial = False  # initial tag found, next search will be for the end tag
                 if paragraph.contains(end):
                     # if the initial and end tag are in the same paragraph, treat them together
                     paragraph.replace_block(initial, end, keep_block)
@@ -106,7 +133,7 @@ def _handle_blocks(doc: Any, initial: str, end: str, keep_block: bool) -> bool:
                     paragraph.delete()
                 continue
     if look_for_initial:
-        # if the initial tag wasn't found, the block doesn't exist
+        # if the initial tag wasn't found, the block doesn't exist in the Word document
         return False  # block completed, returns
     else:
         # if the initial tag was found, but not end tag, raise an error

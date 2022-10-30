@@ -20,3 +20,11 @@ class ReversedInitialEndTags(Exception):
             f"The end tag '{end}' appeared before the initial tag '{initial}'. "
             "Make sure you put the initial tag first."
         )
+
+
+class TableIndexNotFound(Exception):
+    def __init__(self, index, table_count) -> None:
+        super().__init__(
+            f"No table found with the index {index}. Your current document has {table_count} tables."
+            "Make sure you set the right table index."
+        )

@@ -4,7 +4,7 @@
 
 This library was built on top of [python-docx](https://python-docx.readthedocs.io/en/latest/index.html) and the main purpose is to replace words inside a document _**without losing the format**_.
 
-There is also a functionality that allows defining blocks in the Word document and set if they will be showed or not.
+There is also a functionality that allows defining blocks in the Word document and set if they will be removed or not.
 
 ## Replacing a word - docx_replace
 
@@ -113,7 +113,7 @@ All done, now you Word document is fully replaced keeping all the format.
 
 ## Replace blocks - docx_blocks
 
-You can define a block in your Word document and set if it is going to be showed or not. The format required for key blocks are exactly like tags `HTML`, as following:
+You can define a block in your Word document and set if it is going to be removed or not. The format required for key blocks are exactly like tags `HTML`, as following:
 
 - Initial of block: `<signature>`
 - End of the block: `</signature>`
@@ -131,7 +131,7 @@ Please, put your signature here: _________________
 </signature>
 ```
 
-### Setting signature to be showed
+### Setting signature to be removed
 
 ```python
 docx_blocks(doc, signature=True)
@@ -147,7 +147,7 @@ Detais of the contract
 Please, put your signature here: _________________
 ```
 
-### Setting signature to not be showed
+### Setting signature to not be removed
 
 ```python
 docx_blocks(doc, signature=False)
@@ -159,6 +159,30 @@ Contract
 
 Detais of the contract
 
+```
+
+### docx_blocks limitation
+
+If there are **tables** inside a block that is set to be removed, these tables are not going to be removed. Tables are different objects in python-docx library and they are not present in the paragraph object.
+
+You can use the function `docx_remove_table` to remove tables from the Word document by their index.
+
+```python
+docx_remove_table(doc, 0)
+```
+
+> The table index works exactly like any indexing property. It means if you remove an index, it will affect the other indexes. For example, if you want to remove the first two tables, you can't do like this:
+
+```python
+docx_remove_table(doc, 0)
+docx_remove_table(doc, 1)  # it will raise an index error
+```
+
+> You should instead do like this:
+
+```python
+docx_remove_table(doc, 0)
+docx_remove_table(doc, 0)
 ```
 
 ## How to install
