@@ -8,11 +8,21 @@ class Paragraph:
     @staticmethod
     def get_all(doc) -> List[Any]:
         paragraphs = list(doc.paragraphs)
+
+        # get paragraphs from tables
         for t in doc.tables:
             for row in t.rows:
                 for cell in row.cells:
                     for paragraph in cell.paragraphs:
                         paragraphs.append(paragraph)
+
+        # get paragraphs from headers and footers
+        for section in doc.sections:
+            for paragraph in section.header.paragraphs:
+                paragraphs.append(paragraph)
+            for paragraph in section.footer.paragraphs:
+                paragraphs.append(paragraph)
+
         return paragraphs
 
     def __init__(self, p) -> None:
