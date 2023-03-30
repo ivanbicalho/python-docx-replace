@@ -2,6 +2,8 @@ from typing import Any
 
 from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound, TableIndexNotFound
 from python_docx_replace.paragraph import Paragraph
+from docx.opc.constants import RELATIONSHIP_TYPE
+
 
 __all__ = ["docx_replace", "docx_blocks", "docx_remove_table"]
 
@@ -26,6 +28,7 @@ def docx_replace(doc, **kwargs: str) -> None:
         for p in Paragraph.get_all(doc):
             paragraph = Paragraph(p)
             paragraph.replace_key(key, str(value))
+        _replace_in_links(doc, key, str(value))
 
 
 def docx_blocks(doc: Any, **kwargs: bool) -> None:
@@ -145,3 +148,18 @@ def _search_for_lost_end_tag(doc: Any, initial: str, end: str) -> None:
         paragraph = Paragraph(p)
         if paragraph.contains(end):
             raise InitialTagNotFound(initial, end)
+
+def _replace_in_links(doc: Any, key: str, value: str):
+    # Make replacements in hyperlink targets
+    rel_dicts = []
+    rel_dicts.append(doc.part.rels)
+
+    for section in doc.sections:
+        rel_dicts.append(section.header.part.rels)
+        rel_dicts.append(section.footer.part.rels)
+
+    for rels in rel_dicts:
+        for rel_id, rel in rels.items():
+            if rel.reltype == RELATIONSHIP_TYPE.HYPERLINK:
+                if key in rel._target:
+                    rel._target = rel._target.replace(key, value)
