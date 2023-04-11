@@ -104,9 +104,12 @@ def _handle_blocks(doc: Any, initial: str, end: str, keep_block: bool) -> bool:
                 else:
                     # the current paragraph doesn't have the end tag
                     if paragraph.startswith(initial):
-                        # if the paragraph starts with the initial tag, we can delete the entire paragraph,
-                        # because the end tag is not here
-                        paragraph.delete()
+                        # if the paragraph starts with the initial tag, we can clear the tag if is to keep_block
+                        # otherwise we can delete the entire paragraph because the end tag is not here
+                        if keep_block:
+                            paragraph.clear_tag_and_before(initial, keep_block)
+                        else:
+                            paragraph.delete()
                         continue
                     else:
                         # if the paragraph doesn't start with the initial tag, we cannot delete the entire
@@ -118,8 +121,12 @@ def _handle_blocks(doc: Any, initial: str, end: str, keep_block: bool) -> bool:
             if paragraph.contains(end):
                 # end tag found in this paragraph
                 if paragraph.endswith(end):
-                    # if the paragraph ends with the end tag, we can delete the entire paragraph
-                    paragraph.delete()
+                    # if the paragraph ends with the end tag we can clear the tag if is to keep_block
+                    # otherwise we can delete the entire paragraph
+                    if keep_block:
+                        paragraph.clear_tag_and_after(end, keep_block)
+                    else:
+                        paragraph.delete()
                     return True  # block completed, returns
                 else:
                     # if the paragraph doesn't end with the end tag, we cannot delete the entire
