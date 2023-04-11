@@ -49,14 +49,7 @@ class Paragraph:
             self._simple_replace_key(key, value)
             if key in self.p.text:
                 self._complex_replace_key(key, value)
-        # Make replacements in hyperlink texts
-        for link in self.p._element.xpath(".//w:hyperlink"):
-            try:
-                inner_run = link.xpath("w:r", namespaces=link.nsmap)[0]
-            except IndexError:
-                continue
-            if key in inner_run.text:
-                inner_run.text = inner_run.text.replace(key, value)
+        self._replace_hyperlinks(key, value)
 
     def replace_block(self, initial, end, keep_block) -> None:
         block_handler = BlockHandler(self.p)
@@ -82,3 +75,13 @@ class Paragraph:
             # if the key appears more than once in the paragraph, it will replaced all
             key_changer = KeyChanger(self.p, key, value)
             key_changer.replace()
+
+    def _replace_hyperlinks(self, key, value) -> None:
+        # Make replacements in hyperlink texts
+        for link in self.p._element.xpath(".//w:hyperlink"):
+            try:
+                inner_run = link.xpath("w:r", namespaces=link.nsmap)[0]
+            except IndexError:
+                continue
+            if key in inner_run.text:
+                inner_run.text = inner_run.text.replace(key, value)
