@@ -3,7 +3,7 @@ from typing import Any
 from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound, TableIndexNotFound
 from python_docx_replace.paragraph import Paragraph
 from docx.opc.constants import RELATIONSHIP_TYPE
-
+import urllib.parse
 
 __all__ = ["docx_replace", "docx_blocks", "docx_remove_table"]
 
@@ -161,5 +161,6 @@ def _replace_in_links(doc: Any, key: str, value: str):
     for rels in rel_dicts:
         for rel_id, rel in rels.items():
             if rel.reltype == RELATIONSHIP_TYPE.HYPERLINK:
-                if key in rel._target:
-                    rel._target = rel._target.replace(key, value)
+                target = urllib.parse.unquote(rel._target)
+                if key in target:
+                    rel._target = urllib.parse.quote(target.replace(key, value))
