@@ -62,6 +62,9 @@ class Paragraph:
         block_handler = BlockHandler(self.p)
         block_handler.clear_key_and_after(key, keep_block)
 
+    def get_text(self) -> str:
+        return self.p.text
+
     def _simple_replace_key(self, key, value) -> None:
         # try to replace a key in the paragraph runs, simpler alternative
         for run in self.p.runs:
