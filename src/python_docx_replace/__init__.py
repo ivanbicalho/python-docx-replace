@@ -1,5 +1,4 @@
 from typing import Any
-
 from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound, TableIndexNotFound
 from python_docx_replace.paragraph import Paragraph
 

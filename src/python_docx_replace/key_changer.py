@@ -33,7 +33,7 @@ class KeyChanger:
             if not self.runs_to_change.get(run_index):
                 self.runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
 
-            run_to_change: Dict = self.runs_to_change.get(run_index)
+            run_to_change: Dict = self.runs_to_change.get(run_index)  # type: ignore[assignment]
             if index == index_to_replace:
                 run_to_change[run_char_index] = self.value
             else:

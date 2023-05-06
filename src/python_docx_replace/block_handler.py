@@ -37,7 +37,7 @@ class BlockHandler:
             if not runs_to_change.get(run_index):
                 runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
 
-            run_to_change: Dict = runs_to_change.get(run_index)
+            run_to_change: Dict = runs_to_change.get(run_index)  # type: ignore[assignment]
             if (
                 (not keep_block)
                 or (index in range(initial_index, initial_index_plus_key_length))
@@ -61,7 +61,7 @@ class BlockHandler:
             if not runs_to_change.get(run_index):
                 runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
 
-            run_to_change: Dict = runs_to_change.get(run_index)
+            run_to_change: Dict = runs_to_change.get(run_index)  # type: ignore[assignment]
             if (not keep_block) or (index in range(key_index, key_index_plus_key_length)):
                 run_to_change[run_char_index] = ""
 
@@ -81,7 +81,7 @@ class BlockHandler:
             if not runs_to_change.get(run_index):
                 runs_to_change[run_index] = [char for char_index, char in enumerate(run.text)]
 
-            run_to_change: Dict = runs_to_change.get(run_index)
+            run_to_change: Dict = runs_to_change.get(run_index)  # type: ignore[assignment]
             if (not keep_block) or (index in range(key_index, key_index_plus_key_length)):
                 run_to_change[run_char_index] = ""
 
