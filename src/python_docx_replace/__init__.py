@@ -96,6 +96,9 @@ def docx_get_keys(doc: Any) -> set:
     Search for all keys in the Word document and return a list of unique elements
 
     ATTENTION: The required format for the keys inside the Word document is: ${key}
+    
+    For a document with the following content: "Hello ${name}, is your phone ${phone}?"
+    Result example: ["name", "phone"]
     """
     result = set()  # unique items
     for p in Paragraph.get_all(doc):

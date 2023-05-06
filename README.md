@@ -111,6 +111,15 @@ Run Char Index:  0   1   2   3   4   5   6      7  8  9 0  1  2   3   4   5   6 
 
 All done, now you Word document is fully replaced keeping all the format.
 
+## Get document keys - docx_get_keys
+
+You can get all the keys present in the Word document by calling the function `docx_get_keys`:
+
+```python
+keys = docx_get_keys(doc) # Let's suppose the Word document has the keys: ${name} and ${phone}
+print(keys)  # ['name', 'phone']
+```
+
 ## Replace blocks - docx_blocks
 
 You can define a block in your Word document and set if it is going to be removed or not. The format required for key blocks are exactly like tags `HTML`, as following:
