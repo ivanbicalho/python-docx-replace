@@ -1,7 +1,5 @@
-mypy
-flake8
-black
-isort
-build
-twine
-python-docx
+mypy==1.2.0
+ruff==0.0.265
+black==23.3.0
+build==0.10.0
+twine==4.0.2

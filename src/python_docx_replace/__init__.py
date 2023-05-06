@@ -1,8 +1,6 @@
 import re
-from typing import Any
-
-from python_docx_replace.exceptions import (EndTagNotFound, InitialTagNotFound,
-                                            TableIndexNotFound)
+from typing import Any, List
+from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound, TableIndexNotFound
 from python_docx_replace.paragraph import Paragraph
 
 __all__ = ["docx_replace", "docx_blocks", "docx_remove_table"]
@@ -91,12 +89,12 @@ def docx_remove_table(doc: Any, index: int) -> None:
         raise TableIndexNotFound(index, len(doc.tables))
 
 
-def docx_get_keys(doc: Any) -> set:
+def docx_get_keys(doc: Any) -> List[str]:
     """
     Search for all keys in the Word document and return a list of unique elements
 
     ATTENTION: The required format for the keys inside the Word document is: ${key}
-    
+
     For a document with the following content: "Hello ${name}, is your phone ${phone}?"
     Result example: ["name", "phone"]
     """
