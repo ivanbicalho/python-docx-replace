@@ -1,6 +1,8 @@
+import re
 from typing import Any
 
-from python_docx_replace.exceptions import EndTagNotFound, InitialTagNotFound, TableIndexNotFound
+from python_docx_replace.exceptions import (EndTagNotFound, InitialTagNotFound,
+                                            TableIndexNotFound)
 from python_docx_replace.paragraph import Paragraph
 
 __all__ = ["docx_replace", "docx_blocks", "docx_remove_table"]
@@ -87,6 +89,24 @@ def docx_remove_table(doc: Any, index: int) -> None:
         table._element.getparent().remove(table._element)
     except IndexError:
         raise TableIndexNotFound(index, len(doc.tables))
+
+
+def docx_get_keys(doc: Any) -> set:
+    """
+    Search for all keys in the Word document and return a list of unique elements
+
+    ATTENTION: The required format for the keys inside the Word document is: ${key}
+    
+    For a document with the following content: "Hello ${name}, is your phone ${phone}?"
+    Result example: ["name", "phone"]
+    """
+    result = set()  # unique items
+    for p in Paragraph.get_all(doc):
+        paragraph = Paragraph(p)
+        matches = re.finditer(r"\$\{([^{}]+)\}", paragraph.get_text())
+        for match in matches:
+            result.add(match.groups()[0])
+    return list(result)
 
 
 def _handle_blocks(doc: Any, initial: str, end: str, keep_block: bool) -> bool:
