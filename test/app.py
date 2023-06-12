@@ -5,7 +5,7 @@ from python_docx_replace import docx_remove_table, docx_replace, docx_blocks
 def manual_test():
     doc = Document("test/hello.docx")
 
-    docx_replace(doc, name="Ivan Bicalho")
+    docx_replace(doc, name="Ivan Bicalho", github_name="ivanbicalho")
     docx_blocks(doc, block=True)
     docx_remove_table(doc, 0)
 
